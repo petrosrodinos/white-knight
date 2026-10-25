@@ -182,8 +182,8 @@ SPECS = {
     "ship.glb": dict(nodes=["Ship", "Deck_Archer_Spot_1", "Deck_Archer_Spot_2", "Deck_Archer_Spot_3"],
                      mats=["Wood", "Primary", "Metal", "DarkMetal", "Cloth"], clips={}, max=STATIC_MAX),
     "props.glb": dict(nodes=["Arrow", "Spear", "Javelin", "Rock", "Boulder", "SpikeTrap_Base", "SpikeTrap_Spikes", "FallingBeam",
-                             "Chandelier", "Crate", "Barrel", "Banner", "LandingFlag", "Torch"],
-                      mats=["Wood", "Metal", "DarkMetal", "Primary", "Glow", "Cloth", "Stone"], clips={}, max=STATIC_MAX),
+                             "Chandelier", "Crate", "Barrel", "Banner", "LandingFlag", "Torch", "ShieldBubble"],
+                      mats=["Wood", "Metal", "DarkMetal", "Primary", "Glow", "Cloth", "Stone", "Bubble", "BubbleRib"], clips={}, max=STATIC_MAX),
 }
 # props: ((length along X, height along Y), origin rule)
 PROP_DIMS = {
@@ -192,6 +192,7 @@ PROP_DIMS = {
     "SpikeTrap_Spikes": ((None, 0.7), "base"), "FallingBeam": ((2.2, None), "centre"), "Chandelier": ((1.2, None), "ring"),
     "Crate": ((None, 0.9), "base"), "Barrel": ((None, 1.0), "base"), "Banner": ((None, 2.6), "base"),
     "LandingFlag": ((None, 3.0), "base"), "Torch": ((None, 1.0), "base"),
+    "ShieldBubble": ((2.4, 2.4), "centre"),
 }
 
 

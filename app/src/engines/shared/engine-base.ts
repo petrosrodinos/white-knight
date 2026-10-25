@@ -1,8 +1,8 @@
 import { LIVES, segmentsFor } from '@/core/combat/combat-config';
-import type { CameraHint, EngineStatus, GameEngine, HudBar, HudSnapshot, RunOutcome, SceneState } from '@/core/engine/engine-types';
+import type { CameraHint, ControlHint, EngineStatus, GameEngine, HudBar, HudSnapshot, RunOutcome, SceneState } from '@/core/engine/engine-types';
 import { readPlayerIntent } from '@/core/engine/player-controller';
 import { isAlive } from '@/core/sim/fighter';
-import type { AttackAction, Fighter, GameEvent } from '@/core/sim/types';
+import { emptyIntent, type AttackAction, type Fighter, type GameEvent } from '@/core/sim/types';
 import { World } from '@/core/sim/world';
 import type { Difficulty, EngineKind } from '@/content/ids';
 import { nearestEnemy } from '@/core/ai/controllers';
@@ -58,7 +58,7 @@ export abstract class EngineBase implements GameEngine {
     const p = this.world.player;
     if (!p || !isAlive(p)) return { interact: false };
     if (this.status !== 'playing') {
-      p.intent = { moveX: 0, moveY: 0, jump: false, dodge: false, block: false, light: false, heavy: false, interact: false, special: null };
+      p.intent = emptyIntent();
       return { interact: false };
     }
     p.intent = readPlayerIntent(this.world, p);
@@ -104,6 +104,21 @@ export abstract class EngineBase implements GameEngine {
     return { name: f.name, hp: Math.max(0, Math.round(f.hp)), maxHp: f.maxHp, segments: segmentsFor(f.maxHp) };
   }
 
+  /** Only the controls the player can actually use in their current state. */
+  protected controlHints(p: Fighter | undefined | null): ControlHint[] {
+    if (!p || !isAlive(p)) return [];
+    const flying = p.mounted === 'hippogryph';
+    const rows: ControlHint[] = flying
+      ? [{ label: 'Climb / dive', actions: ['moveUp', 'moveDown'] }, { label: 'Slow / fly on', actions: ['moveLeft', 'moveRight'] }]
+      : [{ label: 'Move', actions: ['moveLeft', 'moveRight'] }];
+    if (!flying && !p.mounted && p.stats.canJump) rows.push({ label: 'Jump', actions: ['moveUp'] });
+    if (p.stats.canDodge) rows.push({ label: flying ? 'Evade' : 'Dodge', actions: ['dodge'] });
+    if (p.stats.canBlock) rows.push({ label: 'Block', actions: ['block'] });
+    if (p.shieldMax > 0) rows.push({ label: 'Energy shield (hold)', actions: ['shield'] });
+    rows.push({ label: 'Light attack', actions: ['lightAttack'] }, { label: 'Heavy attack', actions: ['heavyAttack'] });
+    return rows;
+  }
+
   protected baseHud(): HudSnapshot {
     const p = this.world.player;
     const kills = Object.values(this.world.stats.kills).reduce((s, n) => s + (n ?? 0), 0);
@@ -128,6 +143,8 @@ export abstract class EngineBase implements GameEngine {
       squads: null,
       commanders: null,
       progress: null,
+      controls: this.controlHints(p),
+      shield: p && p.shieldMax > 0 ? { energy: Math.round(p.shield), max: p.shieldMax, active: p.shieldOn, broken: p.shieldBroken > 0 } : null,
     };
   }
 

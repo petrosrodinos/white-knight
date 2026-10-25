@@ -3,7 +3,7 @@ import type { CharacterId, Difficulty, EnemyType, MissionId } from '@/content/id
 /** Shapes mirror docs/contracts.md §2. Keep in sync with the API. */
 
 export const GAME_ACTIONS = [
-  'moveLeft', 'moveRight', 'moveUp', 'moveDown', 'dodge', 'block', 'interact',
+  'moveLeft', 'moveRight', 'moveUp', 'moveDown', 'dodge', 'block', 'shield', 'interact',
   'lightAttack', 'heavyAttack', 'orderMove', 'orderHold', 'orderRetreat', 'orderCharge', 'cycleSelection',
 ] as const;
 export type GameAction = (typeof GAME_ACTIONS)[number];

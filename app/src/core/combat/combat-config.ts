@@ -37,6 +37,16 @@ export const DAMAGE = {
   finisher: 18,
 } as const;
 
+/** Duel round pacing. */
+export const DUEL = {
+  /** A round cannot end on an HP threshold before this many seconds of actual fighting. */
+  minRoundSeconds: 12,
+  /** Mounted rounds end when a rider is down to this much HP (of 150): one blow from a KO. */
+  mountedEndHp: 50,
+  /** Foot rounds that are followed by another round end at this HP (of 100): the last health block. */
+  footEndHp: 25,
+} as const;
+
 /** Moveset tunables. */
 export const MOVES = {
   plungeFallSpeed: 26,
@@ -47,6 +57,23 @@ export const MOVES = {
   lungeWindow: 0.3,
   riposteWindow: 0.9,
   riposteMultiplier: 2,
+} as const;
+
+/** Energy shield (hold the shield key): a bubble that soaks every damage source, magic included. */
+export const SHIELD = {
+  max: 60,
+  /** Energy drained per second while the bubble is up. */
+  drain: 6,
+  /** Seconds after lowering before the energy starts to recover. */
+  rechargeDelay: 1.0,
+  /** Energy recovered per second. */
+  recharge: 14,
+  /** Seconds the shield is offline after it breaks. */
+  brokenTime: 3.0,
+  /** Fraction of max energy it comes back with when it reboots. */
+  rebootFraction: 0.35,
+  /** Minimum energy needed to raise the bubble. */
+  minToRaise: 8,
 } as const;
 
 /** Fraction of damage that leaks through a block. */

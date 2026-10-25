@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ScreenShell } from '@/components/layout/screen-shell';
 import { MissionCard, StatTile, IconFlag, IconStar, IconTrophy, Button, IconRefresh } from '@/ui';
-import { MISSIONS } from '@/missions/catalog';
+import { MISSIONS, type MissionMeta } from '@/missions/catalog';
+import { MissionInfoModal } from './components/mission-info-modal';
 import { useProgress } from '@/features/progress/hooks/use-progress';
 import { getContinueMissionId, missionEntry, missionStatus } from '@/features/progress/utils/progress.utils';
 import { Paths } from '@/routes/paths';
@@ -10,6 +12,7 @@ import { formatNumber } from '@/lib/format';
 /** Mission select: the 15 missions in a strictly linear grid (locked ones cannot be opened). */
 export default function CampaignPage() {
   const navigate = useNavigate();
+  const [lockedInfo, setLockedInfo] = useState<MissionMeta | null>(null);
   const { data: progress, isError, refetch, isFetching } = useProgress();
   const continueId = progress ? getContinueMissionId(progress) : null;
   const completed = MISSIONS.filter((m) => missionStatus(progress, m.id) === 'completed').length;
@@ -45,11 +48,13 @@ export default function CampaignPage() {
                 bestRank={entry?.bestRank}
                 isCurrent={m.id === continueId}
                 onOpen={() => navigate(m.isTraining ? Paths.training : Paths.briefing(m.id))}
+                onLockedOpen={() => setLockedInfo(m)}
               />
             </li>
           );
         })}
       </ol>
+      <MissionInfoModal mission={lockedInfo} onClose={() => setLockedInfo(null)} />
     </ScreenShell>
   );
 }

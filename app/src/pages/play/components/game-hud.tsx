@@ -4,7 +4,7 @@ import { useCalloutStore, useHudStore } from '@/core/hud/hud-store';
 import { formatKeyCode, useSettingsStore } from '@/core/settings/settings-store';
 import { OpenFieldEngine } from '@/engines/open-field/open-field-engine';
 import { useSessionStore } from '@/stores/session-store';
-import { BossHealthBar, Button, HudBanner, HudCorner, HudLabel, HudLayer, HudName, HudStat, IconGear, IconSkull, IconSword, IconShield, ManaBar, SegmentedHealthBar, cn } from '@/ui';
+import { BossHealthBar, Button, HudBanner, KeyCap, HudCorner, HudLabel, HudLayer, HudName, HudStat, IconGear, IconSkull, IconSword, IconShield, ManaBar, SegmentedHealthBar, cn } from '@/ui';
 
 const ORDER_LABEL: Record<string, string> = { advance: 'Follow', move: 'Move', hold: 'Hold', retreat: 'Retreat', charge: 'Charge' };
 
@@ -16,6 +16,41 @@ function Lives({ lives, max }: { lives: number; max: number }) {
         <IconShield key={i} className={cn('size-4 sm:size-5', i < lives ? 'text-bronze-300 drop-shadow' : 'text-iron-700 opacity-50')} aria-hidden />
       ))}
     </div>
+  );
+}
+
+/** Energy-shield meter: cyan while ready, pulsing while up, amber + "Rebooting" when broken. */
+function ShieldMeter({ shield }: { shield: NonNullable<HudSnapshot['shield']> }) {
+  const key = useSettingsStore((s) => s.settings.keyBindings.shield[0]);
+  const pct = Math.max(0, Math.min(1, shield.energy / shield.max)) * 100;
+  return (
+    <div className="flex w-full max-w-[220px] items-center gap-2" aria-label={`Energy shield ${Math.round(pct)} percent${shield.broken ? ', rebooting' : ''}`}>
+      <IconShield className={cn('size-4 shrink-0', shield.broken ? 'text-oxblood-300' : 'text-[#8fdcff]')} aria-hidden />
+      <div className={cn('h-2 flex-1 overflow-hidden rounded-full border border-[#0b0807] bg-night-900/70', shield.active && 'motion-safe:animate-pulse-soft')}>
+        <div className={cn('h-full transition-[width] duration-150', shield.broken ? 'bg-[#e0a040]' : 'bg-[linear-gradient(90deg,#3d8fc4,#8fdcff)]')} style={{ width: `${pct}%` }} />
+      </div>
+      <HudLabel>{shield.broken ? 'Rebooting' : key ? formatKeyCode(key) : ''}</HudLabel>
+    </div>
+  );
+}
+
+/** Live controls corner: only the keys usable in the current state, using the player's bindings. */
+function ControlsCorner({ controls }: { controls: HudSnapshot['controls'] }) {
+  const bindings = useSettingsStore((s) => s.settings.keyBindings);
+  if (controls.length === 0) return null;
+  return (
+    <HudCorner position="bottom-right" scrim className="max-w-[26vw]" aria-label="Controls">
+      <dl className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1">
+        {controls.map((c) => (
+          <div key={c.label} className="contents">
+            <dt className="wk-hud-label text-right">{c.label}</dt>
+            <dd className="flex gap-1">
+              {c.actions.map((a) => (bindings[a][0] ? <KeyCap key={a} code={bindings[a][0]} size="sm" /> : null))}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </HudCorner>
   );
 }
 
@@ -86,7 +121,7 @@ function Squads({ hud }: { hud: HudSnapshot }) {
   );
 }
 
-export function GameHud({ engine, onPause }: { engine: GameEngine; onPause: () => void }) {
+export function GameHud({ engine, onPause, showControls = true }: { engine: GameEngine; onPause: () => void; showControls?: boolean }) {
   const hud = useHudStore((s) => s.hud);
   const fps = useHudStore((s) => s.fps);
   const showFps = useSettingsStore((s) => s.settings.showFps);
@@ -99,6 +134,7 @@ export function GameHud({ engine, onPause }: { engine: GameEngine; onPause: () =
       <HudCorner position="top-left" scrim>
         <HudName>{hud.playerName}</HudName>
         <SegmentedHealthBar current={hud.player.hp} max={hud.player.maxHp} segments={hud.player.segments} tone="health" size="md" label={`${hud.playerName} health`} />
+        {hud.shield && <ShieldMeter shield={hud.shield} />}
         <div className="flex items-center gap-3">
           <Lives lives={hud.lives} max={hud.maxLives} />
           {hud.enemiesRemaining !== null && <HudStat label="Enemies" value={hud.enemiesRemaining} icon={<IconSkull className="size-4" aria-hidden />} />}
@@ -156,6 +192,7 @@ export function GameHud({ engine, onPause }: { engine: GameEngine; onPause: () =
         {showFps && <HudLabel>{fps} FPS</HudLabel>}
       </HudCorner>
 
+      {showControls && <ControlsCorner controls={hud.controls} />}
       <MoveCallout />
       {hud.banner && (
         <div key={hud.banner.id} className="absolute left-1/2 top-[30%] -translate-x-1/2 animate-slam-in" role="status" aria-live="polite">

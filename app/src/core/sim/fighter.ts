@@ -1,4 +1,4 @@
-import { ATTACK_TIMING, COMBO_CANCEL_FRACTION, DAMAGE, HEALTH, INPUT_BUFFER, MOVEMENT, MOVES, REACH, REACTION } from '@/core/combat/combat-config';
+import { ATTACK_TIMING, COMBO_CANCEL_FRACTION, DAMAGE, HEALTH, INPUT_BUFFER, MOVEMENT, MOVES, REACH, REACTION, SHIELD } from '@/core/combat/combat-config';
 import { attackPhaseAt, timingTotal, type MeleeKind } from '@/core/combat/combat-math';
 import type { FighterArchetype } from '@/content/fighters';
 import type { World } from './world';
@@ -24,6 +24,8 @@ export interface SpawnOptions {
 export function createFighter(id: number, arch: FighterArchetype, o: SpawnOptions): Fighter {
   const mountedHp = o.mounted === 'horse' ? (o.isPlayer ? HEALTH.playerMounted : arch.stats.maxHp + 50) : arch.stats.maxHp;
   const maxHp = o.maxHp ?? mountedHp;
+  // Knight-class humanoids carry the energy shield (only the player's intent ever raises it).
+  const shieldMax = arch.enemyType === null && arch.look.model === 'humanoid' ? SHIELD.max : 0;
   return {
     id,
     name: o.name ?? arch.name,
@@ -72,6 +74,11 @@ export function createFighter(id: number, arch: FighterArchetype, o: SpawnOption
     tookDamageThisRound: false,
     meleeKind: 'light',
     meleeDamage: arch.stats.lightDamage,
+    shield: shieldMax,
+    shieldMax,
+    shieldOn: false,
+    shieldDelay: 0,
+    shieldBroken: 0,
     riposteT: 0,
     lastDodgeEnd: -10,
     fade: 1,
@@ -221,6 +228,50 @@ function startDodge(world: World, f: Fighter) {
   world.emit({ type: 'dodge', x: f.x, mounted: !!f.mounted, isPlayer: f.isPlayer });
 }
 
+/** Energy shield: raised while held, drains over time, recovers when down, reboots after breaking. */
+function updateShield(world: World, f: Fighter, dt: number) {
+  if (f.shieldMax <= 0) return;
+  const was = f.shieldOn;
+  if (f.shieldBroken > 0) {
+    f.shieldBroken = Math.max(0, f.shieldBroken - dt);
+    if (f.shieldBroken === 0) f.shield = f.shieldMax * SHIELD.rebootFraction;
+    f.shieldOn = false;
+  } else {
+    const usable = f.action !== 'dead' && f.action !== 'stunned' && f.shield >= (was ? 0.01 : SHIELD.minToRaise);
+    f.shieldOn = f.intent.shield && usable;
+  }
+  if (f.shieldOn) {
+    f.shield = Math.max(0, f.shield - SHIELD.drain * dt);
+    f.shieldDelay = SHIELD.rechargeDelay;
+    if (f.shield <= 0) breakShield(world, f);
+  } else if (f.shieldBroken <= 0) {
+    f.shieldDelay = Math.max(0, f.shieldDelay - dt);
+    if (f.shieldDelay === 0) f.shield = Math.min(f.shieldMax, f.shield + SHIELD.recharge * dt);
+  }
+  if (f.shieldOn && !was) world.emit({ type: 'shield-up', x: f.x, isPlayer: f.isPlayer });
+}
+
+function breakShield(world: World, f: Fighter) {
+  f.shield = 0;
+  f.shieldOn = false;
+  f.shieldBroken = SHIELD.brokenTime;
+  world.emit({ type: 'shield-break', x: f.x, y: f.y + 1.2 * f.look.scale, isPlayer: f.isPlayer });
+}
+
+/**
+ * The bubble soaks incoming damage 1:1 from its energy. Returns the damage that gets through
+ * (0 while the bubble holds; the overflow if this hit breaks it).
+ */
+export function absorbWithShield(world: World, f: Fighter, amount: number): number {
+  if (!f.shieldOn || amount <= 0) return amount;
+  const soaked = Math.min(amount, f.shield);
+  f.shield -= soaked;
+  f.shieldDelay = SHIELD.rechargeDelay;
+  world.emit({ type: 'shield-hit', x: f.x, y: f.y + 1.2 * f.look.scale, isPlayer: f.isPlayer });
+  if (f.shield <= 0.01) breakShield(world, f);
+  return amount - soaked;
+}
+
 /** Called once per fixed step for every fighter. */
 export function updateFighter(world: World, f: Fighter, dt: number) {
   const it = f.intent;
@@ -229,6 +280,7 @@ export function updateFighter(world: World, f: Fighter, dt: number) {
   f.invulnT = Math.max(0, f.invulnT - dt);
   f.hitFlash = Math.max(0, f.hitFlash - dt * 6);
   f.riposteT = Math.max(0, f.riposteT - dt);
+  updateShield(world, f, dt);
 
   if (f.action === 'dead') {
     f.deathT += dt;

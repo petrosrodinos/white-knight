@@ -42,30 +42,33 @@ export interface MissionCardProps {
   /** Marks the Continue target. */
   isCurrent?: boolean;
   onOpen?: () => void;
+  /** Called when a locked card is clicked (shows its info instead of opening it). */
+  onLockedOpen?: () => void;
   className?: string;
 }
 
 /**
  * Campaign mission tile with illustration, numeral, engine label and best result.
- * Locked missions are inert (aria-disabled) and explain how to unlock.
+ * Locked missions explain how to unlock and, when `onLockedOpen` is given, open an info modal on click.
  */
-export function MissionCard({ mission, status, bestScore = 0, bestTimeMs = null, bestRank = null, isCurrent, onOpen, className }: MissionCardProps) {
+export function MissionCard({ mission, status, bestScore = 0, bestTimeMs = null, bestRank = null, isCurrent, onOpen, onLockedOpen, className }: MissionCardProps) {
   const locked = status === 'locked';
   const completed = status === 'completed';
   const lockHint = mission.number > 1 ? `Complete Mission ${mission.number - 1} to unlock` : 'Locked';
   return (
     <button
       type="button"
-      aria-disabled={locked || undefined}
+      aria-haspopup={locked && onLockedOpen ? 'dialog' : undefined}
       aria-label={
         locked
-          ? `Mission ${mission.number}: ${mission.title}. Locked. ${lockHint}.`
+          ? `Mission ${mission.number}: ${mission.title}. Locked. ${lockHint}.${onLockedOpen ? ' Press to read its briefing.' : ''}`
           : `Mission ${mission.number}: ${mission.title}. ${completed ? `Completed${bestRank ? `, rank ${bestRank}` : ''}, best score ${formatNumber(bestScore)}.` : status === 'in_progress' ? 'In progress.' : 'Available.'}`
       }
       onMouseEnter={() => !locked && uiSound('ui-hover')}
       onClick={() => {
         if (locked) {
-          uiSound('ui-error');
+          uiSound(onLockedOpen ? 'page-turn' : 'ui-error');
+          onLockedOpen?.();
           return;
         }
         uiSound('page-turn');
@@ -75,7 +78,7 @@ export function MissionCard({ mission, status, bestScore = 0, bestTimeMs = null,
         'wk-frame group flex flex-col overflow-hidden !p-0 text-left transition-[transform,filter] duration-200 ease-[var(--ease-weighty)]',
         completed ? 'wk-frame--bronze' : '',
         isCurrent && !locked && 'wk-frame--bronze ring-2 ring-bronze-300/60 ring-offset-2 ring-offset-night-950',
-        locked ? 'cursor-not-allowed' : 'hover:-translate-y-1 hover:brightness-110',
+        locked ? (onLockedOpen ? 'cursor-pointer hover:brightness-110' : 'cursor-not-allowed') : 'hover:-translate-y-1 hover:brightness-110',
         className,
       )}
     >

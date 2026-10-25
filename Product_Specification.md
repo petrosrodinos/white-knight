@@ -439,12 +439,14 @@ Applies across all engines unless noted. Key bindings are remappable in Settings
 | Move | `W` `A` `S` `D` |
 | Dodge | `Space` |
 | Block / Shield | `Shift` |
+| Energy shield (hold) | `C` |
 | Interact | `E` |
 | Light Attack | Left Mouse Button |
 | Heavy Attack | Right Mouse Button |
 
 - **Dodge** grants a brief invincibility window, with a short cooldown. Cannot dodge while blocking.
 - **Block** raises the shield, stopping most physical projectiles (arrows, spears, javelins). It does **not** stop magic projectiles or fireballs. Cannot block while dodging. A heavy enemy attack can break a block and briefly stagger the player.
+- **Energy shield** (hold `C`, owner request 2026-10-25) raises a translucent bubble that soaks any damage — magic, fireballs and rocks included — from energy that drains while it is up and recovers while it is down. If a hit overwhelms it, the shield breaks, the overflow goes through and it stays offline for 3 s.
 
 **Engine A additional controls**
 
@@ -566,7 +568,7 @@ The campaign is strictly linear. Missions unlock one at a time; the player canno
 ### Mission 3 — Quest to Cordova
 - **Engine:** Quest/Journey → Boss Duel
 - **Environments:** Forest → Mountains → City Gate / Bridge. **Hazards:** Arrows, Spears, Javelins. **Enemies:** Archers, Spearmen, Infantry. **Waves:** 5 → 10 → 15.
-- **Boss:** Black Knight, three rounds — **R1:** mounted; **R2:** on foot; **R3:** on foot, no helmets. The boss dismounts after losing at least two health blocks.
+- **Boss:** Black Knight, three rounds — **R1:** mounted; **R2:** on foot; **R3:** on foot, no helmets. The boss dismounts after losing at least two health blocks (implemented as: a mounted round ends when a rider is down to 50 of 150 HP, a foot round that precedes another ends at 25 of 100, and no round ends on HP before 12 s of fighting; a killing blow always ends it).
 - **Reward:** information needed for the next mission.
 
 ### Mission 4 — Quest to the Wizard Tower

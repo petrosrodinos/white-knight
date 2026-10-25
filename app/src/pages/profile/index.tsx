@@ -1,14 +1,12 @@
 import { ScreenShell } from '@/components/layout/screen-shell';
 import { CharacterPortrait } from '@/components/character/character-portrait';
-import { Button, IconCheck, IconClock, IconCrown, IconMail, IconShield, IconStar, LevelBadge, Panel, PanelHeader, RankBadge, StatTile, XpBar, toast } from '@/ui';
+import { IconCheck, IconClock, IconCrown, IconShield, IconStar, LevelBadge, Panel, PanelHeader, RankBadge, StatTile, XpBar } from '@/ui';
 import { CHARACTER_IDS, type CharacterId } from '@/content/ids';
 import { MISSIONS } from '@/missions/catalog';
 import { useMe, useMeQuery } from '@/features/me/hooks/use-me';
 import { useProgress } from '@/features/progress/hooks/use-progress';
 import { missionEntry, missionStatus } from '@/features/progress/utils/progress.utils';
-import { useResendVerification } from '@/features/auth/hooks/use-auth';
 import { getCharacterUnlockDescription } from '@/config/constants/dropdowns/characters/character-unlock-description.options';
-import { errorMessage } from '@/api/errors';
 import { Paths } from '@/routes/paths';
 import { formatDuration, formatNumber, toRoman } from '@/lib/format';
 
@@ -17,7 +15,6 @@ export default function ProfilePage() {
   useMeQuery();
   const me = useMe();
   const { data: progress } = useProgress();
-  const resend = useResendVerification();
   if (!me) return null;
 
   const unlocked = new Set<CharacterId>([...me.unlockedCharacters, ...(progress?.unlockedCharacters ?? [])]);
@@ -40,42 +37,10 @@ export default function ProfilePage() {
                 <dd className="truncate text-parchment-100">{me.email}</dd>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <dt className="text-fg-muted">Status</dt>
-                <dd>
-                  {me.emailVerified ? (
-                    <span className="inline-flex items-center gap-1 rounded-[3px] border border-forest-500 bg-forest-700/50 px-2 py-0.5 font-heading text-[0.75rem] font-bold uppercase tracking-wider text-success-fg">
-                      <IconCheck size={13} /> Verified
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-[3px] border border-oxblood-500 bg-oxblood-800/50 px-2 py-0.5 font-heading text-[0.75rem] font-bold uppercase tracking-wider text-danger-fg">
-                      Unverified
-                    </span>
-                  )}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
                 <dt className="text-fg-muted">Sworn in</dt>
                 <dd className="text-parchment-100">{joined.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</dd>
               </div>
             </dl>
-            {!me.emailVerified && (
-              <Button
-                className="mt-4"
-                size="sm"
-                block
-                leadingIcon={<IconMail size={16} />}
-                loading={resend.isPending}
-                disabled={resend.isSuccess}
-                onClick={() =>
-                  resend.mutate(undefined, {
-                    onSuccess: () => toast.success('Verification email sent', { description: `Check ${me.email}.` }),
-                    onError: (e) => toast.error('Could not send email', { description: errorMessage(e) }),
-                  })
-                }
-              >
-                {resend.isSuccess ? 'Email sent' : 'Resend verification'}
-              </Button>
-            )}
           </Panel>
           <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-1">
             <StatTile icon={<IconCrown size={22} />} label="Total points" value={formatNumber(me.profile.totalPoints)} />

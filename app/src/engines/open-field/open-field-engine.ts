@@ -319,6 +319,13 @@ export class OpenFieldEngine extends EngineBase {
     h.commanders = { remaining, total: this.commanders.length };
     h.enemiesRemaining = this.world.alive(1).length;
     h.stageLabel = 'Open Field';
+    h.controls.push(
+      { label: 'Select company', actions: ['cycleSelection'] },
+      { label: 'Move to cursor', actions: ['orderMove'] },
+      { label: 'Hold position', actions: ['orderHold'] },
+      { label: 'Retreat', actions: ['orderRetreat'] },
+      { label: 'Charge', actions: ['orderCharge'] },
+    );
     h.objective = 'Defeat or rout every enemy commander';
     return h;
   }

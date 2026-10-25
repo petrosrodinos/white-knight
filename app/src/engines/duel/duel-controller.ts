@@ -1,7 +1,7 @@
 import { createBossModule } from '@/bosses/modules';
 import type { BossContext, BossModule } from '@/bosses/boss-module';
 import { BOSS_ARCHETYPES, ENEMY_ARCHETYPES, archetypeFor, type FighterArchetype } from '@/content/fighters';
-import { HEALTH, REACTION } from '@/core/combat/combat-config';
+import { DUEL, HEALTH, REACTION } from '@/core/combat/combat-config';
 import { runAi } from '@/core/ai/controllers';
 import { isAlive, setAction } from '@/core/sim/fighter';
 import { emptyIntent, type Fighter } from '@/core/sim/types';
@@ -326,7 +326,9 @@ export class DuelController {
       return;
     }
     const end = this.round.endsWhen;
-    if (end.type === 'hpAtOrBelow' && (this.player.hp <= end.hp || this.opponent.hp <= end.hp)) this.endRound();
+    // A round never flips within seconds: the threshold only counts after a minimum fighting time
+    // (a fighter who is actually killed still ends the round at once, see preventDeath).
+    if (end.type === 'hpAtOrBelow' && this.phaseT >= DUEL.minRoundSeconds && (this.player.hp <= end.hp || this.opponent.hp <= end.hp)) this.endRound();
     void REACTION;
     void w;
   }

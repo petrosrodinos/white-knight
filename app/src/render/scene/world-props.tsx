@@ -97,6 +97,7 @@ export function WorldProps({ world }: Props) {
     const glow = new THREE.MeshBasicMaterial({ map: glowTexture(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
     const shadow = new THREE.MeshBasicMaterial({ map: glowTexture(), color: '#000000', transparent: true, opacity: 0.38, depthWrite: false });
     const beamMat = new THREE.MeshBasicMaterial({ map: glowTexture(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+    const bubbleMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.3, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
     const quad = new THREE.PlaneGeometry(1, 1);
     const pools = {
       arrow: new Pool(propGeometry(props, 'Arrow', () => arrowGeometry(0.85, 0.018, 0.035)), wood),
@@ -113,6 +114,7 @@ export function WorldProps({ world }: Props) {
         ),
         iron,
       ),
+      bubble: new Pool(propGeometry(props, 'ShieldBubble', () => new THREE.SphereGeometry(1.2, 20, 14)), bubbleMat, 16, 25),
       glow: new Pool(quad, glow, 256, 30),
       shadow: new Pool(quad, shadow, 256, -5),
       beam: new Pool(quad, beamMat, 16, 31),
@@ -121,6 +123,7 @@ export function WorldProps({ world }: Props) {
     };
     pools.glow.mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(256 * 3), 3);
     pools.beam.mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(16 * 3), 3);
+    pools.bubble.mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(16 * 3), 3);
     return pools;
   }, [props]);
 
@@ -175,6 +178,15 @@ export function WorldProps({ world }: Props) {
         const floor = w.floorAt(f);
         if (f.mounted === 'hippogryph' && h > 5) continue;
         put(pools.shadow, f.x, floor + 0.02, -0.4, 0, wdt, wdt * 0.22, 1);
+      }
+      // Energy-shield bubbles; they turn amber and flicker as the energy runs low.
+      for (const f of w.fighters) {
+        if (!f.shieldOn || f.removed) continue;
+        const k = f.shield / f.shieldMax;
+        const s = (f.mounted === 'horse' ? 1.55 : 1) * f.look.scale * (0.84 + 0.025 * Math.sin(t * 6));
+        const flicker = k < 0.25 && Math.sin(t * 28) > 0.3 ? 0.35 : 1;
+        const cy = f.y + (f.mounted === 'horse' ? 1.7 : 1.0) * f.look.scale;
+        put(pools.bubble, f.x, cy, f.isPlayer ? 0.9 : 0.4, 0, s, s, s, tmp.c.setHSL(0.55 - 0.45 * Math.max(0, 0.5 - k), 0.85, 0.6 * flicker).getStyle());
       }
       for (const pr of w.projectiles) {
         const angle = Math.atan2(pr.vy, pr.vx);

@@ -50,6 +50,7 @@ export class DuelEngine extends EngineBase {
     if (d.partner) {
       h.allies = [d.player, d.partner].map((f) => ({ ...this.bar(f), active: f.isPlayer }));
       h.prompt = isAlive(d.partner) ? 'E — Tag partner' : null;
+      if (isAlive(d.partner)) h.controls.push({ label: 'Tag partner', actions: ['interact'] });
     }
     return h;
   }

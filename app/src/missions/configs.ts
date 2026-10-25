@@ -1,4 +1,5 @@
 import type { CharacterId, MissionId } from '@/content/ids';
+import { DUEL } from '@/core/combat/combat-config';
 import type { DuelConfigInput } from '@/engines/duel/duel-config';
 import type { OpenFieldConfigInput } from '@/engines/open-field/open-field-config';
 import type { QuestConfigInput } from '@/engines/quest/quest-config';
@@ -17,8 +18,8 @@ const W2 = 10;
 const W3 = 15;
 
 const threeRoundKnight = [
-  { mount: 'horse' as const, helmets: true, endsWhen: { type: 'hpAtOrBelow' as const, hp: 100 } },
-  { mount: 'none' as const, helmets: true, endsWhen: { type: 'hpAtOrBelow' as const, hp: 50 } },
+  { mount: 'horse' as const, helmets: true, endsWhen: { type: 'hpAtOrBelow' as const, hp: DUEL.mountedEndHp } },
+  { mount: 'none' as const, helmets: true, endsWhen: { type: 'hpAtOrBelow' as const, hp: DUEL.footEndHp } },
   { mount: 'none' as const, helmets: false, endsWhen: { type: 'ko' as const } },
 ];
 
@@ -48,7 +49,7 @@ export const MISSION_CONFIGS: Record<Exclude<MissionId, 'm07'>, MissionConfig> =
       player: { character: 'white-knight' },
       opponent: { ref: 'enemy-commander', name: 'Lord Hrothmar' },
       rounds: [
-        { label: 'Mounted', mount: 'horse', helmets: true, endsWhen: { type: 'hpAtOrBelow', hp: 100 } },
+        { label: 'Mounted', mount: 'horse', helmets: true, endsWhen: { type: 'hpAtOrBelow', hp: DUEL.mountedEndHp } },
         { label: 'On foot — helmets off', mount: 'none', helmets: false, endsWhen: { type: 'ko' } },
       ],
       intro: { speaker: 'Lord Hrothmar', text: 'Horse against horse — then steel against steel.' },
@@ -203,7 +204,7 @@ export const MISSION_CONFIGS: Record<Exclude<MissionId, 'm07'>, MissionConfig> =
           duel: {
             opponent: { ref: 'blue-paladin', name: 'Oliver, the Blue Paladin', isBoss: true },
             rounds: [
-              { label: 'On foot', mount: 'none', helmets: true, endsWhen: { type: 'hpAtOrBelow', hp: 50 } },
+              { label: 'On foot', mount: 'none', helmets: true, endsWhen: { type: 'hpAtOrBelow', hp: DUEL.footEndHp } },
               { label: 'On foot — helmets off', mount: 'none', helmets: false, endsWhen: { type: 'ko' } },
             ],
             intro: { speaker: 'Oliver', text: 'Hold, stranger! Prove you are no servant of Cordova.' },
@@ -368,7 +369,7 @@ export const MISSION_CONFIGS: Record<Exclude<MissionId, 'm07'>, MissionConfig> =
       player: { character: 'emperor-disguise' },
       opponent: { ref: 'white-knight', name: 'The White Knight', isBoss: true },
       rounds: [
-        { label: 'Mounted', mount: 'horse', helmets: true, endsWhen: { type: 'hpAtOrBelow', hp: 100 } },
+        { label: 'Mounted', mount: 'horse', helmets: true, endsWhen: { type: 'hpAtOrBelow', hp: DUEL.mountedEndHp } },
         { label: 'On foot', mount: 'none', helmets: true, endsWhen: { type: 'ko' } },
       ],
       intro: { speaker: 'Herald', text: 'Champions! First with horse and blade — then on foot until one yields!' },

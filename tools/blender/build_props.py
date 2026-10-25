@@ -11,6 +11,7 @@ at the natural pivot, pointing +X where directional (Blender +Z up → glTF +Y u
     SpikeTrap_Base (1.6 × 0.8 m plate)                — origin at the plate's bottom centre
     SpikeTrap_Spikes (5 spikes, 0.7 m)                — origin at the spikes' base
     Crate, Barrel, Banner, LandingFlag (3 m), Torch   — origin on the ground / handle bottom
+    ShieldBubble (2.4 m sphere, ribbed energy dome)    — centred; the client scales/tints it per fighter
 
 Static; materials carry natural colours (`Primary` stays near-white so the client can tint it).
 """
@@ -27,7 +28,8 @@ from lib.geom import Geo, cylinder, extrude_outline, lathe, rounded_box, section
 from lib.materials import hex_to_linear  # noqa: E402
 
 COLORS = {"Wood": ("#7a5a3a", 0.85, 0.0), "Metal": ("#b8bcc2", 0.4, 0.4), "DarkMetal": ("#45454b", 0.55, 0.35),
-          "Cloth": ("#d8cfb8", 0.9, 0.0), "Stone": ("#857d72", 0.95, 0.0), "Glow": ("#ffb347", 0.4, 0.0)}
+          "Cloth": ("#d8cfb8", 0.9, 0.0), "Stone": ("#857d72", 0.95, 0.0), "Glow": ("#ffb347", 0.4, 0.0),
+          "Bubble": ("#8fdcff", 0.15, 0.0), "BubbleRib": ("#e8f7ff", 0.3, 0.2)}
 
 
 def hashf(*a):
@@ -256,12 +258,28 @@ def torch():
     return g
 
 
+def shield_bubble():
+    """Energy shield dome: a translucent shell (tinted/alpha'd by the client) with latitude + meridian ribs,
+    a boss ring and stud on the front (+X). Centred on the origin, diameter 2.4 m."""
+    R = 1.2
+    g = superquad(R, R, R, 2.0, 2.0, seg=28, rings=16, mat="Bubble")
+    for z in (-0.66, 0.0, 0.66):                      # latitude rings
+        r = math.sqrt(R * R - z * z) + 0.004
+        g.add(torus(r, 0.017, 36, 4, mat="BubbleRib").move(0, 0, z))
+    for a in (0, 45, 90, 135):                        # meridian ribs
+        g.add(torus(R + 0.004, 0.017, 36, 4, mat="BubbleRib").rotate(90, "X").rotate(a, "Z"))
+    # boss ring + stud on the front face
+    g.add(torus(0.34, 0.02, 6, 4, mat="BubbleRib").rotate(90, "Y").move(R * 0.97, 0, 0))
+    g.add(superquad(0.07, 0.07, 0.07, 2.0, 2.0, seg=10, rings=5, mat="BubbleRib").move(R * 1.0, 0, 0))
+    return g
+
+
 PROPS = [
     ("Arrow", arrow), ("Spear", spear), ("Javelin", javelin),
     ("Rock", lambda: rock(0.8, 1.7)), ("Boulder", lambda: rock(1.8, 4.2, seg=14, rings=9, squash=0.85)),
     ("SpikeTrap_Base", spike_base), ("SpikeTrap_Spikes", spikes), ("FallingBeam", falling_beam),
     ("Chandelier", chandelier), ("Crate", crate), ("Barrel", barrel), ("Banner", banner),
-    ("LandingFlag", landing_flag), ("Torch", torch),
+    ("LandingFlag", landing_flag), ("Torch", torch), ("ShieldBubble", shield_bubble),
 ]
 
 
@@ -270,7 +288,7 @@ def build():
     mats = {}
     for name, (hexv, rough, metal) in COLORS.items():
         mats[name] = materials.make(name, rgb=hex_to_linear(hexv), roughness=rough, metallic=metal,
-                                    emission=2.0 if name == "Glow" else None)
+                                    emission=2.0 if name == "Glow" else 0.6 if name == "Bubble" else None)
     mats["Primary"] = materials.make("Primary")
     # spread the roots out along -Y so they do not overlap in the file (pivots stay at each root's origin)
     tris = 0

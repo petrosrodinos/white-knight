@@ -23,6 +23,8 @@ export interface Intent {
   jump: boolean;
   dodge: boolean;
   block: boolean;
+  /** Held: energy-shield bubble. */
+  shield: boolean;
   light: boolean;
   heavy: boolean;
   interact: boolean;
@@ -30,7 +32,7 @@ export interface Intent {
   special: 'shoot' | 'throw' | 'cast' | null;
 }
 
-export const emptyIntent = (): Intent => ({ moveX: 0, moveY: 0, jump: false, dodge: false, block: false, light: false, heavy: false, interact: false, special: null });
+export const emptyIntent = (): Intent => ({ moveX: 0, moveY: 0, jump: false, dodge: false, block: false, shield: false, light: false, heavy: false, interact: false, special: null });
 
 export type ProjectileKind = 'arrow' | 'spear' | 'javelin' | 'fireball' | 'magic' | 'rock' | 'fortress-shot' | 'city-shot';
 
@@ -131,6 +133,14 @@ export interface Fighter {
   meleeKind: MeleeKind;
   /** Damage of the current melee swing (set when the attack starts). */
   meleeDamage: number;
+  /** Energy-shield state (player-side humanoid knights; shieldMax 0 = no shield). */
+  shield: number;
+  shieldMax: number;
+  shieldOn: boolean;
+  /** Seconds until the energy starts recovering. */
+  shieldDelay: number;
+  /** Seconds the shield stays offline after breaking (> 0 = broken). */
+  shieldBroken: number;
   /** Seconds left in which the next blow is a riposte (after a perfect block). */
   riposteT: number;
   /** World time the last dodge ended (dodge → lunge). */
@@ -200,6 +210,9 @@ export type GameEvent =
   | { type: 'land'; x: number; heavy: boolean; surface: GroundMaterial }
   | { type: 'footstep'; x: number; surface: GroundMaterial; mounted: boolean; isPlayer: boolean; creature: boolean }
   | { type: 'block-raise'; x: number }
+  | { type: 'shield-up'; x: number; isPlayer: boolean }
+  | { type: 'shield-hit'; x: number; y: number; isPlayer: boolean }
+  | { type: 'shield-break'; x: number; y: number; isPlayer: boolean }
   | { type: 'death'; x: number; y: number; id: number; enemyType: EnemyType | null; isPlayer: boolean; model: ModelId; spectral: boolean; mounted: boolean }
   | { type: 'release'; x: number; y: number; kind: ProjectileKind | 'cast' }
   | { type: 'impact'; x: number; y: number; kind: ProjectileKind; blocked: boolean; hitFighter: boolean }

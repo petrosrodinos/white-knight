@@ -3,7 +3,7 @@ import { isHitActive, resolveMeleeHit, resolveProjectileHit, type DefenderState 
 import type { Difficulty, GroundMaterial } from '@/content/ids';
 import type { FighterArchetype } from '@/content/fighters';
 import { Rng } from '@/core/math/rng';
-import { applyDamage, applyReaction, attackPhase, createFighter, hitbox, hurtbox, isAlive, setAction, updateFighter, type SpawnOptions } from './fighter';
+import { absorbWithShield, applyDamage, applyReaction, attackPhase, createFighter, hitbox, hurtbox, isAlive, setAction, updateFighter, type SpawnOptions } from './fighter';
 import { updateHazards } from './hazards';
 import { updateProjectiles } from './projectiles';
 import { MELEE_ACTIONS, emptyStats, type AttackAction, type Fighter, type GameEvent, type Hazard, type Projectile, type ProjectileKind, type RunStats } from './types';
@@ -178,6 +178,17 @@ export class World {
       r.stagger = r.stun > 0 && def.poise !== 'full';
       this.emit({ type: 'special', x: t.x, y: t.y + 1.5, move: 'riposte', isPlayer: a.isPlayer });
     }
+    if (t.shieldOn && r.damage > 0) {
+      const through = absorbWithShield(this, t, r.damage);
+      if (through <= 0) {
+        // The energy bubble held: no damage, no stagger, just a shove.
+        this.emit({ type: 'hit', x: (a.x + t.x) / 2, y: t.y + 1.3 * t.look.scale, outcome: 'blocked', damage: 0, heavy: kind !== 'light', targetId: t.id, attackerId: a.id, armored: true, isPlayer: t.isPlayer, creature: false });
+        t.pushX += (t.x >= a.x ? 1 : -1) * 0.8;
+        if (a.isPlayer || t.isPlayer) this.hitPause(REACTION.hitPauseLight * 0.7);
+        return;
+      }
+      r.damage = through;
+    }
     const heavy = kind !== 'light';
     const armored = t.look.model === 'humanoid' && t.enemyType !== 'zombie' && t.enemyType !== 'servant' && t.enemyType !== 'bandit';
     this.emit({ type: 'hit', x: (a.x + t.x) / 2 + (t.x - a.x) * 0.2, y: t.y + (t.mounted ? 2.2 : 1.3) * t.look.scale, outcome: r.outcome as 'hit', damage: r.damage, heavy, targetId: t.id, attackerId: a.id, armored, isPlayer: t.isPlayer, creature: t.look.model !== 'humanoid' });
@@ -227,6 +238,11 @@ export class World {
     const attacker = attackerId >= 0 ? this.byId(attackerId) ?? null : null;
     const r = resolveProjectileHit(damage * this.damageScale(attacker, t), blockable, def);
     if (r.outcome === 'blocked') return 'blocked';
+    if (t.shieldOn && r.damage > 0) {
+      const through = absorbWithShield(this, t, r.damage);
+      if (through <= 0) return 'blocked';
+      r.damage = through;
+    }
     const killed = applyDamage(this, t, r.damage, attackerId);
     applyReaction(t, killed ? 0 : r.stun, false, r.knockback, fromX);
     if (r.outcome === 'hit') {

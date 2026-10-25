@@ -133,7 +133,7 @@ export function TouchControls({ engineKind, flight }: { engineKind: EngineKind; 
       <div className={cn('absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] grid grid-cols-3 items-end gap-2', left ? 'left-[calc(1rem+env(safe-area-inset-left))]' : 'right-[calc(1rem+env(safe-area-inset-right))]')}>
         <ActionButton action="block" label="Block" size={s} tone="iron" />
         <ActionButton action="heavyAttack" label="Heavy" size={s * 1.05} tone="oxblood" />
-        <div />
+        <ActionButton action="shield" label="Shield" sub="hold" size={s * 0.85} tone="forest" />
         <ActionButton action="dodge" label="Dodge" size={s} tone="forest" />
         <ActionButton action="lightAttack" label="Strike" size={s * 1.3} tone="bronze" />
         <ActionButton action="interact" label="E" sub="Act" size={s * 0.8} tone="iron" />

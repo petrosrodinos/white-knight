@@ -53,7 +53,7 @@ They render the **exported** files with an orthographic camera looking along glT
 | `build_troll.py` | 3 m swamp troll, humanoid-style joint names + `Weapon_Club` on `J_Hand_R` |
 | `build_beast.py` | wolf + boar (per-kind geometry tables, shared gallop/lunge/death clips, global `scale`) |
 | `build_bird.py`, `build_tree.py` | bird of prey (reuses `WingSpec`), haunted tree (`J_Root` location drives Rise/Death) |
-| `build_ship.py`, `build_props.py` | static cog (clinker hull, castles, sail, rigging, shields) and 14 prop root nodes; natural colours because the client renders them raw |
+| `build_ship.py`, `build_props.py` | static cog (clinker hull, castles, sail, rigging, shields) and 15 prop root nodes (incl. the `ShieldBubble` energy dome); natural colours because the client renders them raw |
 
 ## Conventions
 
@@ -80,7 +80,7 @@ They render the **exported** files with an orthographic camera looking along glT
 | `bird.glb` | Origin under the body (body centre 0.30 m up); wingspan 1.44 m. |
 | `haunted-tree.glb` | Face points forward and 40° towards the camera; Rise starts ~5.8 m below y=0, Death ends fully below ground. |
 | `ship.glb` | Root `Ship`, bow +X, origin on the **waterline** mid-ship (keel −1.1, castles 4.0–4.3, mast top 13.2, bowsprit to x=8.6; hull 14.6 m). `Deck_Archer_Spot_1..3` = aft castle (−5.3, 4.02), forecastle (6.1, 4.32), main deck (2.3, 1.77). Static; only `Primary` (sail, pennant, half the rail shields) is meant to be tinted. |
-| `props.glb` | 14 root empties named per contract with `<Name>_Mesh` children; roots are spread along glTF +Z in the file — read each node's own transform (`propGeometry` already does). Rocks use an extra `Stone` material. |
+| `props.glb` | 15 root empties named per contract with `<Name>_Mesh` children; roots are spread along glTF +Z in the file — read each node's own transform (`propGeometry` already does). Rocks use an extra `Stone` material. |
 
 ## Adding an asset
 

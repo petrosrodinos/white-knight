@@ -1,3 +1,4 @@
+import type { GameAction } from '@/api/types';
 import type { EngineKind, EnvId, GroundMaterial } from '@/content/ids';
 import type { RunStats } from '@/core/sim/types';
 import type { World } from '@/core/sim/world';
@@ -22,6 +23,12 @@ export interface HudSquad {
   total: number;
   order: 'move' | 'hold' | 'retreat' | 'charge' | 'advance';
   selected: boolean;
+}
+
+/** One line of the in-game controls corner: a label and the actions whose keys are shown. */
+export interface ControlHint {
+  label: string;
+  actions: GameAction[];
 }
 
 export interface HudSnapshot {
@@ -49,6 +56,10 @@ export interface HudSnapshot {
   commanders: { remaining: number; total: number } | null;
   /** Flight missions: progress to the landing zone 0..1. */
   progress: number | null;
+  /** Controls usable right now (changes with mount, flight, partner, mission type). */
+  controls: ControlHint[];
+  /** Energy shield meter of the player (null when the fighter has none). */
+  shield: { energy: number; max: number; active: boolean; broken: boolean } | null;
 }
 
 export interface SceneState {

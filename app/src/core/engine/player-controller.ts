@@ -17,6 +17,7 @@ export function readPlayerIntent(world: World, f: Fighter): Intent {
   it.jump = f.mounted !== 'hippogryph' && input.wasPressed('moveUp');
   it.dodge = input.wasPressed('dodge');
   it.block = input.isHeld('block');
+  it.shield = input.isHeld('shield');
   it.light = input.wasPressed('lightAttack');
   it.heavy = input.wasPressed('heavyAttack');
   it.interact = input.wasPressed('interact');

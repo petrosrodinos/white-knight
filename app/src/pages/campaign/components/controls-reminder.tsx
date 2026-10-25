@@ -14,6 +14,7 @@ const BASE: Row[] = [
   { action: 'moveUp', label: 'Jump' },
   { action: 'dodge', label: 'Dodge' },
   { action: 'block', label: 'Block' },
+  { action: 'shield', label: 'Energy shield (hold)' },
   { action: 'lightAttack', label: 'Light attack' },
   { action: 'heavyAttack', label: 'Heavy attack' },
 ];
@@ -40,6 +41,7 @@ const k = (b: Bindings, a: GameAction) => formatKeyCode(b[a][0] ?? '?');
 /** Contextual moves built from the basic actions (no extra keys). */
 const MOVES: Array<{ name: string; how: (b: Bindings) => string }> = [
   { name: 'Shield bash', how: (b) => `hold ${k(b, 'block')} + ${k(b, 'lightAttack')} — breaks a guard` },
+  { name: 'Energy shield', how: (b) => `hold ${k(b, 'shield')} — a bubble that soaks any damage, magic too; breaks when drained` },
   { name: 'Perfect block', how: (b) => `raise ${k(b, 'block')} just before a blow — your next strike is a riposte` },
   { name: 'Jump slash', how: (b) => `${k(b, 'moveUp')} then ${k(b, 'lightAttack')} in the air` },
   { name: 'Plunging strike', how: (b) => `${k(b, 'moveUp')} then ${k(b, 'heavyAttack')} — ground slam hits all nearby` },

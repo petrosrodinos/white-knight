@@ -17,6 +17,7 @@ export const GameActionOptions: GameActionOption[] = [
   { id: 'lightAttack', label: 'Light attack', group: 'Combat' },
   { id: 'heavyAttack', label: 'Heavy attack', group: 'Combat' },
   { id: 'block', label: 'Block / Shield', group: 'Combat' },
+  { id: 'shield', label: 'Energy shield (hold)', group: 'Combat' },
   { id: 'orderMove', label: 'Order: move to cursor', group: 'Battle orders' },
   { id: 'orderHold', label: 'Order: hold position', group: 'Battle orders' },
   { id: 'orderRetreat', label: 'Order: retreat', group: 'Battle orders' },

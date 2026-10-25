@@ -133,6 +133,19 @@ export class PresentationDirector {
         case 'block-raise':
           audio.play('shield-raise', { x: e.x, volume: 0.45 });
           break;
+        case 'shield-up':
+          audio.play('shield-raise', { x: e.x, volume: e.isPlayer ? 0.5 : 0.3, rate: 1.4 });
+          this.magic(e.x, 1.2, 10, '#8fdcff', 2);
+          break;
+        case 'shield-hit':
+          audio.play('block', { x: e.x, volume: 0.55, rate: 1.3 });
+          this.magic(e.x, e.y, 8, '#bfeaff', 3);
+          break;
+        case 'shield-break':
+          audio.play('block-break', { x: e.x, volume: 0.8, rate: 0.9 });
+          this.magic(e.x, e.y, 24, '#8fdcff', 5);
+          this.flash(e.x, e.y, 2.4, '#bfeaff', 0.2);
+          break;
         case 'death': {
           const name = e.model === 'wolf' || e.model === 'boar' ? 'animal-death' : e.model === 'bird' ? 'bird' : e.model === 'troll' ? 'troll-roar' : e.model === 'haunted-tree' ? 'tree-rise' : e.spectral ? 'ghost-death' : e.enemyType === 'zombie' ? 'zombie-death' : 'death';
           audio.play(name, { x: e.x, volume: e.isPlayer ? 1 : 0.75 });

@@ -262,7 +262,7 @@ export default function PlayPage() {
           )}
         >
           <GameCanvas key={runKey} engine={engine} paused={paused || phase !== 'playing'} onPause={() => phase === 'playing' && setPaused((p) => !p)} onFinished={() => void finish()} />
-          {phase === 'playing' && <GameHud engine={engine} onPause={() => setPaused(true)} />}
+          {phase === 'playing' && <GameHud engine={engine} onPause={() => setPaused(true)} showControls={!device.isTouch} />}
           {phase === 'playing' && device.isTouch && !paused && <TouchControls engineKind={meta.engine} flight={flight} />}
         </ErrorBoundary>
       )}

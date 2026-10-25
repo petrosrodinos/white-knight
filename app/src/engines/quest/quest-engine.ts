@@ -463,6 +463,7 @@ export class QuestEngine extends EngineBase {
       if (this.duel.partner) {
         h.allies = [this.duel.player, this.duel.partner].map((f) => ({ ...this.bar(f), active: f.isPlayer }));
         h.prompt = isAlive(this.duel.partner) ? 'E — Tag partner' : null;
+        if (isAlive(this.duel.partner)) h.controls.push({ label: 'Tag partner', actions: ['interact'] });
       }
       h.enemiesRemaining = w.alive(1).filter((f) => !f.untargetable).length;
       return h;

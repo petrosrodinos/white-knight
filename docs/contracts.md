@@ -69,11 +69,11 @@ interface GameSettings {
 
 type GameAction =
   | 'moveLeft' | 'moveRight' | 'moveUp' | 'moveDown'
-  | 'dodge' | 'block' | 'interact' | 'lightAttack' | 'heavyAttack'
+  | 'dodge' | 'block' | 'shield' | 'interact' | 'lightAttack' | 'heavyAttack'
   | 'orderMove' | 'orderHold' | 'orderRetreat' | 'orderCharge' | 'cycleSelection';
 ```
 
-Default bindings: moveUp `KeyW`, moveLeft `KeyA`, moveDown `KeyS`, moveRight `KeyD`, dodge `Space`, block `ShiftLeft`+`ShiftRight`, interact `KeyE`, lightAttack `Mouse0`, heavyAttack `Mouse2`, orderMove `KeyQ`, orderHold `KeyR`, orderRetreat `KeyF`, orderCharge `Mouse1`, cycleSelection `Tab`. (`Escape` = pause, not remappable.)
+Default bindings: moveUp `KeyW`, moveLeft `KeyA`, moveDown `KeyS`, moveRight `KeyD`, dodge `Space`, block `ShiftLeft`+`ShiftRight`, shield `KeyC` (hold), interact `KeyE`, lightAttack `Mouse0`, heavyAttack `Mouse2`, orderMove `KeyQ`, orderHold `KeyR`, orderRetreat `KeyF`, orderCharge `Mouse1`, cycleSelection `Tab`. (`Escape` = pause, not remappable.)
 
 | Method & path | Body | Response |
 |---|---|---|
@@ -243,7 +243,7 @@ Large dark bird of prey, wingspan ≈ 1.4 m. Clips `Flap` (loop 0.4), `Dive` (lo
 Enemy medieval cog ≈ 14 m long, side view, `Primary` sail (tinted), `Wood`. No animation. Also include a node `Deck_Archer_Spot_1..3` (empties) where archers stand.
 
 #### `props.glb`
-Separate root nodes, each origin at its natural pivot, pointing +X where directional: `Arrow`, `Spear`, `Javelin`, `Rock`, `Boulder`, `SpikeTrap_Base`, `SpikeTrap_Spikes` (separate root, client raises it), `FallingBeam`, `Chandelier`, `Crate`, `Barrel`, `Banner` (tinted `Primary`), `LandingFlag`, `Torch`.
+Separate root nodes, each origin at its natural pivot, pointing +X where directional: `Arrow`, `Spear`, `Javelin`, `Rock`, `Boulder`, `SpikeTrap_Base`, `SpikeTrap_Spikes` (separate root, client raises it), `FallingBeam`, `Chandelier`, `Crate`, `Barrel`, `Banner` (tinted `Primary`), `LandingFlag`, `Torch`, `ShieldBubble` (2.4 m ribbed energy dome, centred; materials `Bubble`, `BubbleRib`; the client scales, tints and renders it translucent).
 
 Compression: Draco or Meshopt. Each humanoid-class file should be < 1.5 MB.
 
