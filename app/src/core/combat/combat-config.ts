@@ -74,6 +74,8 @@ export const SHIELD = {
   rebootFraction: 0.35,
   /** Minimum energy needed to raise the bubble. */
   minToRaise: 8,
+  /** Fraction of a projectile/hazard hit's damage drained from the bubble; it never leaks through. */
+  rangedCost: 0.3,
 } as const;
 
 /** Fraction of damage that leaks through a block. */
@@ -174,9 +176,9 @@ export const LIVES = {
 
 /** Difficulty scales enemy damage dealt to the player and AI skill. */
 export const DIFFICULTY: Record<Difficulty, { enemyDamage: number; playerDamage: number; aiSkill: number; label: string }> = {
-  squire: { enemyDamage: 0.45, playerDamage: 1.3, aiSkill: 0.45, label: 'Squire' },
-  knight: { enemyDamage: 1, playerDamage: 1, aiSkill: 0.75, label: 'Knight' },
-  champion: { enemyDamage: 1.3, playerDamage: 0.95, aiSkill: 1, label: 'Champion' },
+  squire: { enemyDamage: 0.35, playerDamage: 1.4, aiSkill: 0.4, label: 'Squire' },
+  knight: { enemyDamage: 0.75, playerDamage: 1.1, aiSkill: 0.65, label: 'Knight' },
+  champion: { enemyDamage: 1.15, playerDamage: 1, aiSkill: 0.9, label: 'Champion' },
 };
 
 export const segmentsFor = (maxHp: number) => Math.max(1, Math.round(maxHp / HEALTH.segmentHp));

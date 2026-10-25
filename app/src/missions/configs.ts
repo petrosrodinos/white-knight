@@ -71,15 +71,15 @@ export const MISSION_CONFIGS: Record<Exclude<MissionId, 'm07'>, MissionConfig> =
             { count: 4, enemies: [{ look: 'spearman', weight: 2 }, { look: 'infantry', weight: 2 }], maxAlive: 3 },
             { count: W2 - 4, enemies: [{ look: 'archer', weight: 2 }, { look: 'spearman', weight: 2 }, { look: 'infantry', weight: 1 }], maxAlive: 4 },
           ],
-          hazards: [{ kind: 'projectiles', every: 7, projectile: 'javelin', origin: 'right' }],
+          hazards: [{ kind: 'projectiles', every: 11, projectile: 'javelin', origin: 'right' }],
         },
         {
           kind: 'ground', title: 'The Bridge of Cordova', env: 'city-gate', ground: 'stone', length: 85,
           waves: [
             { count: 5, enemies: [{ look: 'infantry', weight: 2 }, { look: 'spearman', weight: 1 }], maxAlive: 4 },
-            { count: W3 - 5, enemies: [{ look: 'archer', weight: 1 }, { look: 'spearman', weight: 2 }, { look: 'infantry', weight: 2 }], maxAlive: 5 },
+            { count: W3 - 5, enemies: [{ look: 'archer', weight: 1 }, { look: 'spearman', weight: 2 }, { look: 'infantry', weight: 3 }], maxAlive: 4 },
           ],
-          hazards: [{ kind: 'projectiles', every: 6, projectile: 'spear', origin: 'right' }, { kind: 'projectiles', every: 5, projectile: 'arrow', origin: 'right' }],
+          hazards: [{ kind: 'projectiles', every: 12, projectile: 'spear', origin: 'right' }, { kind: 'projectiles', every: 10, projectile: 'arrow', origin: 'right' }],
         },
         {
           kind: 'boss', title: 'The Black Knight',

@@ -31,6 +31,30 @@ export const isPlayable = (
   row: Pick<MissionProgressRow, 'status'> | undefined | null,
 ): boolean => Boolean(row && row.status !== 'locked');
 
+/** Roles that bypass the linear campaign lock. */
+export const isPrivilegedRole = (role: string | null | undefined): boolean =>
+  role === 'ADMIN' || role === 'SUPER_ADMIN';
+
+/** Rows with every mission (training grounds included) playable; real progress is kept. */
+export function withAllUnlocked(
+  rows: MissionProgressRow[],
+): MissionProgressRow[] {
+  const byId = new Map(rows.map((row) => [row.mission_id, row]));
+  const filled: MissionProgressRow[] = MISSION_IDS.map((missionId) => {
+    const row = byId.get(missionId);
+    if (row && row.status !== 'locked') return row;
+    return {
+      mission_id: missionId,
+      status: 'unlocked',
+      best_score: row?.best_score ?? 0,
+      best_time_ms: row?.best_time_ms ?? null,
+      best_rank: row?.best_rank ?? null,
+      completions: row?.completions ?? 0,
+    };
+  });
+  return filled;
+}
+
 /** Full ordered mission list; missions without a stored row are `locked`. */
 export function buildMissionList(rows: MissionProgressRow[]): MissionSummary[] {
   const byId = new Map(rows.map((row) => [row.mission_id, row]));

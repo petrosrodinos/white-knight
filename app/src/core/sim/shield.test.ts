@@ -59,10 +59,13 @@ describe('energy shield', () => {
     expect(p.shield).toBeLessThan(SHIELD.max);
   });
 
-  it('breaks when overwhelmed, lets the overflow through and goes offline', () => {
-    const { w, p } = setup();
+  it('breaks when overwhelmed by melee, lets the overflow through and goes offline', () => {
+    const { w, p, e } = setup();
     hold(w, p, true, 2);
-    w.hurt(p, 100, false, 5, -1);
+    e.meleeKind = 'heavy';
+    e.meleeDamage = 100;
+    p.facing = 1;
+    w.strike(e, p);
     expect(p.hp).toBeLessThan(p.maxHp);
     expect(p.shieldOn).toBe(false);
     expect(p.shieldBroken).toBeGreaterThan(0);
@@ -70,10 +73,21 @@ describe('energy shield', () => {
     expect(p.shieldOn).toBe(false);
   });
 
+  it('stops projectiles and hazards entirely, even a hit that breaks the bubble', () => {
+    const { w, p } = setup();
+    hold(w, p, true, 2);
+    const hp = p.hp;
+    expect(w.hurt(p, 5, true, 5, -1)).toBe('blocked');
+    expect(w.hurt(p, 300, false, 5, -1)).toBe('blocked');
+    expect(p.hp).toBe(hp);
+    expect(p.shieldOn).toBe(false);
+    expect(p.shieldBroken).toBeGreaterThan(0);
+  });
+
   it('reboots with partial energy after the broken time', () => {
     const { w, p } = setup();
     hold(w, p, true, 2);
-    w.hurt(p, 100, false, 5, -1);
+    w.hurt(p, 1000, false, 5, -1);
     hold(w, p, false, Math.ceil((SHIELD.brokenTime + 0.2) / DT));
     expect(p.shieldBroken).toBe(0);
     expect(p.shield).toBeGreaterThanOrEqual(SHIELD.max * SHIELD.rebootFraction);

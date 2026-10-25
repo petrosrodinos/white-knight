@@ -108,8 +108,8 @@ export function updateHazards(world: World, dt: number) {
           const ox = h.variant === 'below' ? target.x + world.rng.range(6, 14) : target.x + world.rng.range(11, 15) * (h.dir || 1);
           const oy = h.variant === 'below' ? -4 : h.variant === 'above' ? target.y + 9 : world.rng.range(1, 4);
           const fake = { id: -1, team: h.team === -1 ? 1 : h.team, x: ox, y: oy, facing: (target.x > ox ? 1 : -1) as 1 | -1, mounted: null, look: { scale: 1 } } as unknown as Fighter;
-          const lead = target.vx * 0.5;
-          world.fireProjectile(fake, kind, target.x + lead, target.y + 1.0);
+          // Aimed at where the target is now (no lead), so moving out of the way works.
+          world.fireProjectile(fake, kind, target.x, target.y + 1.0);
         }
         break;
       }

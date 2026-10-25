@@ -8,7 +8,7 @@ import { World } from './world';
 const DT = 1 / 60;
 
 function setup() {
-  const w = new World(1, 'knight');
+  const w = new World(1, 'champion');
   const p = w.spawn(CHARACTER_ARCHETYPES['white-knight'], { team: 0, x: 0, isPlayer: true });
   const e = w.spawn(ENEMY_ARCHETYPES.infantry, { team: 1, x: 1.2, controller: 'none' });
   return { w, p, e };

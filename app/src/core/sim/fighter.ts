@@ -262,14 +262,16 @@ function breakShield(world: World, f: Fighter) {
  * The bubble soaks incoming damage 1:1 from its energy. Returns the damage that gets through
  * (0 while the bubble holds; the overflow if this hit breaks it).
  */
-export function absorbWithShield(world: World, f: Fighter, amount: number): number {
+export function absorbWithShield(world: World, f: Fighter, amount: number, ranged = false): number {
   if (!f.shieldOn || amount <= 0) return amount;
-  const soaked = Math.min(amount, f.shield);
+  // Projectiles and hazards are stopped outright: they only drain the bubble (cheaper), never leak.
+  const cost = ranged ? amount * SHIELD.rangedCost : amount;
+  const soaked = Math.min(cost, f.shield);
   f.shield -= soaked;
   f.shieldDelay = SHIELD.rechargeDelay;
   world.emit({ type: 'shield-hit', x: f.x, y: f.y + 1.2 * f.look.scale, isPlayer: f.isPlayer });
   if (f.shield <= 0.01) breakShield(world, f);
-  return amount - soaked;
+  return ranged ? 0 : amount - soaked;
 }
 
 /** Called once per fixed step for every fighter. */

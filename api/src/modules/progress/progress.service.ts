@@ -39,8 +39,10 @@ import {
   buildMissionList,
   highestUnlocked,
   isPlayable,
+  isPrivilegedRole,
   missionToUnlock,
   trainingGroundsUnlocked,
+  withAllUnlocked,
 } from './utils/unlock.utils';
 import { pendingMigrations } from './utils/save-migrations.utils';
 
@@ -72,9 +74,19 @@ export class ProgressService {
     userId: string,
     missionId: MissionId,
   ): Promise<MissionStartResponse> {
-    const row = await this.prisma.missionProgress.findUnique({
+    let row = await this.prisma.missionProgress.findUnique({
       where: { user_id_mission_id: { user_id: userId, mission_id: missionId } },
     });
+    // Admins and super admins can play every stage regardless of campaign progress.
+    if (!isPlayable(row) && (await this.isPrivileged(this.prisma, userId))) {
+      row = await this.prisma.missionProgress.upsert({
+        where: {
+          user_id_mission_id: { user_id: userId, mission_id: missionId },
+        },
+        update: { status: 'unlocked' },
+        create: { user_id: userId, mission_id: missionId, status: 'unlocked' },
+      });
+    }
     if (!isPlayable(row))
       throw new ForbiddenException(ErrorMessages.Progress.MISSION_LOCKED);
 
@@ -429,19 +441,32 @@ export class ProgressService {
     });
   }
 
+  private async isPrivileged(
+    client: Prisma.TransactionClient,
+    userId: string,
+  ): Promise<boolean> {
+    const user = await client.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    return isPrivilegedRole(user?.role);
+  }
+
   private async buildProgress(
     client: Prisma.TransactionClient,
     userId: string,
   ): Promise<ProgressResponse> {
-    const [profile, rows, characters] = await Promise.all([
+    const [profile, storedRows, characters, privileged] = await Promise.all([
       client.profile.findUnique({ where: { user_id: userId } }),
       client.missionProgress.findMany({ where: { user_id: userId } }),
       client.unlockedCharacter.findMany({
         where: { user_id: userId },
         select: { character_id: true },
       }),
+      this.isPrivileged(client, userId),
     ]);
     if (!profile) throw new NotFoundException('Profile not found');
+    const rows = privileged ? withAllUnlocked(storedRows) : storedRows;
 
     return {
       saveVersion: profile.save_version,

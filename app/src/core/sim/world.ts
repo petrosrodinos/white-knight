@@ -239,9 +239,8 @@ export class World {
     const r = resolveProjectileHit(damage * this.damageScale(attacker, t), blockable, def);
     if (r.outcome === 'blocked') return 'blocked';
     if (t.shieldOn && r.damage > 0) {
-      const through = absorbWithShield(this, t, r.damage);
-      if (through <= 0) return 'blocked';
-      r.damage = through;
+      absorbWithShield(this, t, r.damage, true);
+      return 'blocked';
     }
     const killed = applyDamage(this, t, r.damage, attackerId);
     applyReaction(t, killed ? 0 : r.stun, false, r.knockback, fromX);

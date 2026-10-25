@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SiteFooter } from '@/components/site-footer';
 import { ErrorBoundary, Toaster, toast } from '@/ui';
 import { ErrorScreen } from '@/pages/error';
 import { AppRoutes } from '@/routes/app-routes';
@@ -69,6 +70,7 @@ export default function App() {
           </a>
           <AppServices />
           <AppRoutes />
+          <SiteFooter />
           <Toaster />
         </BrowserRouter>
       </QueryClientProvider>
